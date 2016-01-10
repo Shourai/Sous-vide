@@ -21,10 +21,10 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I
 // ************************************************
 
 // Output Relay
-#define RelayPin 9
+const int RelayPin = 9;
 
 // One-Wire Temperature Sensor
-#define ONE_WIRE_BUS 7
+const int ONE_WIRE_BUS = 7;
 
 // ************************************************
 // Rotary encoder variables
@@ -32,24 +32,6 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I
 const int PinCLK = 2;    // Used for generating interrupts using CLK signal
 const int PinDT = 3;     // Used for reading DT signal
 const int PinSW = 4;     // Used for the push button switch
-
-
-// ************************************************
-// Display Variables and constants
-// ************************************************
-
-// define the degree symbol 
-byte degree[8] = 
-{ 
- B00110, 
- B01001, 
- B01001, 
- B00110, 
- B00000,
- B00000, 
- B00000, 
- B00000 
-}; 
 
 // ************************************************
 // Sensor Variables and constants
@@ -76,43 +58,42 @@ double Input;
 // ************************************************
 void setup()
 {
-   Serial.begin(9600);
-   
-   // Turn on LCD backlight
-   lcd.backlight();
+  Serial.begin(9600);
 
-   // Initialize Relay Control:
+  // Turn on LCD backlight
+  lcd.backlight();
 
-   pinMode(RelayPin, OUTPUT);    // Output mode to drive relay
-   digitalWrite(RelayPin, HIGH);  // make sure it is off to start
+  // Initialize Relay Control:
 
-   // Initialize LCD Display 
+  pinMode(RelayPin, OUTPUT);    // Output mode to drive relay
+  digitalWrite(RelayPin, HIGH);  // make sure it is off to start
 
-   lcd.begin(20, 4);
-   lcd.createChar(1, degree); // create degree symbol from the binary
-   
-   lcd.setCursor(0, 0);
-   lcd.print("   Sous Vide!");
+  // Initialize LCD Display 
 
-   // Start up the DS18B20 One Wire Temperature Sensor
+  lcd.begin(20, 4);
 
-   sensors.begin();
-   if (!sensors.getAddress(tempSensor, 0)) 
-   {
-      lcd.setCursor(0, 1);
-      lcd.print("Sensor Error");
-   }
-   sensors.setResolution(tempSensor, 12);
-   sensors.setWaitForConversion(false);
+  lcd.setCursor(0, 0);
+  lcd.print("   Sous Vide!");
 
-   delay(1000);  // Splash screen
-   lcd.clear();
+  // Start up the DS18B20 One Wire Temperature Sensor
 
-    // Initialize the pins for the KY-040 rotary encoder
-   pinMode(PinCLK, INPUT);
-   pinMode(PinDT, INPUT);
-   pinMode(PinSW, INPUT_PULLUP);
-   attachInterrupt(0, Rotate, CHANGE); 
+  sensors.begin();
+  if (!sensors.getAddress(tempSensor, 0)) 
+  {
+    lcd.setCursor(0, 1);
+    lcd.print("Sensor Error");
+  }
+  sensors.setResolution(tempSensor, 12);
+  sensors.setWaitForConversion(false);
+
+  delay(1000);  // Splash screen
+  lcd.clear();
+
+  // Initialize the pins for the KY-040 rotary encoder
+  pinMode(PinCLK, INPUT);
+  pinMode(PinDT, INPUT);
+  pinMode(PinSW, INPUT_PULLUP);
+  attachInterrupt(0, Rotate, CHANGE); 
 }
 
 // ************************************************
@@ -125,7 +106,7 @@ void loop()
   LCD();
   TempSensor();
   Reset();
-   
+
 }
 // ************************************************
 // Initilialize the LCD
@@ -133,21 +114,21 @@ void loop()
 void LCD()
 {
   // Initialize LCD
-   lcd.backlight();
-      
-   lcd.setCursor(0,0);
-   lcd.print("Current: ");
-   lcd.print(Input);
-   lcd.write(1);
-   lcd.print("C");
+  lcd.backlight();
 
-   lcd.setCursor(0,1);
-   lcd.print("Settemp: ");
-   lcd.print((int) Setpoint);   //typecast to int to fit the display
-   lcd.write(1);
-   lcd.print("C        ");
+  lcd.setCursor(0,0);
+  lcd.print("Current: ");
+  lcd.print(Input);
+  lcd.write((char) 223);
+  lcd.print("C");
 
-   delay(100); // 100 ms to update the LCD
+  lcd.setCursor(0,1);
+  lcd.print("Settemp: ");
+  lcd.print((int) Setpoint);   //typecast to int to fit the display
+  lcd.write((char) 223);
+  lcd.print("C        ");
+
+  delay(100); // 100 ms to update the LCD
 }
 
 // ************************************************
@@ -163,32 +144,31 @@ void TempSensor()
   }
 }
 
-
 // ************************************************
 // Rotary encoder functions
 // ************************************************
 
-  // Interrupt service routine is executed when a HIGH to LOW transition is detected on CLK
-  void Rotate()  {
-  boolean up;
-	boolean CLK = digitalRead(PinCLK);
-	boolean DT = digitalRead(PinDT);
-	up = ((!CLK && DT) || (CLK && !DT));
-	if (!up){
-		Setpoint += 1;
+// Interrupt service routine is executed when a HIGH to LOW transition is detected on CLK
+void Rotate()  {
+  bool up;
+  bool CLK = digitalRead(PinCLK);
+  bool DT = digitalRead(PinDT);
+  up = ((!CLK && DT) || (CLK && !DT));
+  if (!up){
+    Setpoint += 1;
   }
-	else {
-		Setpoint -= 1;
+  else {
+    Setpoint -= 1;
   }
 }
 
-  // Reset rotary encoder when pushbutton is pressed
-  void Reset() 
+// Reset rotary encoder when pushbutton is pressed
+void Reset() 
 {
   int SW;
-	SW = digitalRead(PinSW);
+  SW = digitalRead(PinSW);
 
-	if ( SW == LOW ) {      // check if pushbutton is pressed
-		Setpoint = 0;              // if YES, then reset counter to ZERO
-	}
+  if ( SW == LOW ) {      // check if pushbutton is pressed
+    Setpoint = 0;              // if YES, then reset counter to ZERO
+  }
 }
