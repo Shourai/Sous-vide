@@ -170,9 +170,9 @@ void TempSensor()
 
   // Interrupt service routine is executed when a HIGH to LOW transition is detected on CLK
   void Rotate()  {
-  volatile boolean up;
-	volatile boolean CLK = digitalRead(PinCLK);
-	volatile boolean DT = digitalRead(PinDT);
+  boolean up;
+	boolean CLK = digitalRead(PinCLK);
+	boolean DT = digitalRead(PinDT);
 	up = ((!CLK && DT) || (CLK && !DT));
 	if (!up){
 		Setpoint += 1;
@@ -183,15 +183,12 @@ void TempSensor()
 }
 
   // Reset rotary encoder when pushbutton is pressed
-  void Reset() {
-
-  // define initital switch states
-  int initSW = HIGH;
-  int SW = HIGH;
-
+  void Reset() 
+{
+  int SW;
 	SW = digitalRead(PinSW);
-	if ( SW == LOW && initSW == HIGH ) {      // check if pushbutton is pressed
+
+	if ( SW == LOW ) {      // check if pushbutton is pressed
 		Setpoint = 0;              // if YES, then reset counter to ZERO
 	}
-	SW = initSW; // Reset the switch (SW) back to HIGH
 }
